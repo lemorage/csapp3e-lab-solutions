@@ -20,8 +20,20 @@ void show_int(int x) {
     show_bytes((byte_pointer) &x, sizeof(int)); 
 }
 
+void show_short(short x) {
+    show_bytes((byte_pointer) &x, sizeof(short));
+}
+
+void show_long(long x) {
+    show_bytes((byte_pointer) &x, sizeof(long));
+}
+
 void show_float(float x) {
     show_bytes((byte_pointer) &x, sizeof(float));
+}
+
+void show_double(double x) {
+    show_bytes((byte_pointer) &x, sizeof(double));
 }
 
 void show_pointer(void *x) {
@@ -33,14 +45,23 @@ void show_pointer(void *x) {
 /* $begin test-show-bytes */
 void test_show_bytes(int val) {
     int ival = val;
+    short sval = (short) ival;
+    long lval = (long) ival;
     float fval = (float) ival;
+    double dval = (double) ival;
     int *pval = &ival;
     printf("Stack variable ival = %d\n", ival);
     printf("(int)ival:\n");
     show_int(ival);
-    printf("(float)ival:\n", ival);
+    printf("(short)ival:\n");
+    show_short(sval);
+    printf("(long)ival:\n");
+    show_long(lval);
+    printf("(float)ival:%f\n", (float)ival);
     show_float(fval);
-    printf("&ival:\n", ival);
+    printf("(double)ival:%lf\n", (double)ival);
+    show_double(dval);
+    printf("&ival:%p\n", (void *)&ival);
     show_pointer(pval);
 }
 /* $end test-show-bytes */
