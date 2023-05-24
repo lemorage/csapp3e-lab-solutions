@@ -12,7 +12,18 @@ COMMON_TARGETS = is-little-endian \
 		 bad-int-size-is-32 \
 		 lower-one-mask \
 		 rotate-left \
-		 fits-bits
+		 fits-bits\
+		 xbyte\
+		 copy-int\
+		 saturating-add\
+		 tsub-ok\
+		 unsigned-high-prod\
+		 calloc\
+		 divide-power2\
+		 mul3div4\
+		 threefourths\
+		 patterns
+
 
 ifeq ($(ARCH), i686)
 	ARCH_TARGET = show-bytes32
@@ -99,36 +110,25 @@ calloc: calloc.c
 	$(CC) $(CFLAGS) calloc.c -o calloc
 	
 # 2.78
-	$(CC) $(CFLAGS) 
+divide-power2: divide-power2.c
+	$(CC) $(CFLAGS) divide-power2.c -o divide-power2
+
+# 2.79
+mul3div4: mul3div4.c
+	$(CC) $(CFLAGS) mul3div4.c -o mul3div4
 
 # 2.80
-	$(CC) $(CFLAGS) 
+threefourths: threefourths.c
+	$(CC) $(CFLAGS) threefourths.c -o threefourths
 
 # 2.81
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
-	$(CC) $(CFLAGS) 
+patterns: patterns.c
+	$(CC) $(CFLAGS) patterns.c -o patterns
 
 .PHONY: run
 run: $(ARCH_TARGET) $(COMMON_TARGETS)
 	for target in $^; do ./$$target; done
 
 clean:
-	rm -f *~ *.o show-bytes32 show-bytes64
+	rm -f *~ *.o $(COMMON_TARGETS) $(ARCH_TARGET)
+	@echo "All targets cleaned"
