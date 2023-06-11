@@ -8,7 +8,15 @@ CINC =
 F64 =-m64
 
 NCMOV = -fno-if-conversion
+.DEFAULT_GOAL := all
 
+
+# To generate the assembly files, you can run the following commands:
+  # make <filename>.64s
+  # make <filename>.O1-64s
+  # make <filename>.64bs
+  # make <filename>.64o
+# Replace <filename> with the name of the C file (without the .c extension)
 
 .SUFFIXES: .c .64s .64bs .O1-64s .64o .64d
 
