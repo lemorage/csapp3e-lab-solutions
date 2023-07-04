@@ -1,0 +1,85 @@
+# Y86-64 program to implement switchv using a jump table
+
+# Function: switchv
+# Arguments:
+#   %rdi: idx - The value to switch on
+# Returns:
+#   %rax: result - The result based on the switch cases
+switchv:
+    irmovq  $0x0, %rax          # Initialize result to 0
+
+    irmovq  $8, %rdx            # Compute the offset for jump table indexing
+    imulq   %rdx, %rdi
+
+    irmovq  $jt, %rdx           # Load jump table address into %rdx
+    addq    %rdi, %rdx          # Add offset to jump table address
+
+    mrmovq  (%rdx), %rdx        # Load address from jump table based on idx
+    pushq   %rdx                # Push computed address onto the stack
+
+    ret                        # Return, effectively jumping to the computed address
+
+# Jump table
+jt:
+    .quad   case_0              # Address of case 0
+    .quad   default_case        # Address of default case
+    .quad   case_2_5            # Address of case 2 and 5
+    .quad   case_3              # Address of case 3
+
+# Test code
+.pos    0
+irmovq  $CNT, %rcx             # Counter for the loop
+irmovq  $MINVAL, %rax          # Initialize MINVAL
+
+loop:
+    pushq   %rcx                # Push counter onto the stack
+
+    irmovq  $0, %rdi            # Clear %rdi
+    irmovq  $0xaaa, %rax        # Set result to 0xaaa
+    cmpq    $0, %rax            # Compare result with 0
+    je      common_case         # Jump to common case if result is 0
+
+    irmovq  $8, %rdx            # Compute the offset for jump table indexing
+    imulq   %rdx, %rax          # Multiply offset by result
+
+    irmovq  $jt, %rdx           # Load jump table address into %rdx
+    addq    %rax, %rdx          # Add offset to jump table address
+
+    mrmovq  (%rdx), %rdx        # Load address from jump table based on result
+    pushq   %rdx                # Push computed address onto the stack
+
+    jmp     handle_result       # Jump to handle_result
+
+case_0:
+    rmmovq  %rax, (%rsp)        # Store result on the stack
+    irmovq  $1, %rcx            # Set counter to 1
+    jmp     loop_end            # Jump to loop_end
+
+case_2_5:
+    rmmovq  %rax, (%rsp)        # Store result on the stack
+    irmovq  $2, %rcx            # Set counter to 2
+    jmp     loop_end            # Jump to loop_end
+
+case_3:
+    rmmovq  %rax, (%rsp)        # Store result on the stack
+    irmovq  $3, %rcx            # Set counter to 3
+    jmp     loop_end            # Jump to loop_end
+
+default_case:
+    rmmovq  %rax, (%rsp)        # Store result on the stack
+    irmovq  $4, %rcx            # Set counter to 4
+    jmp     loop_end            # Jump to loop_end
+
+common_case:
+    irmovq  $0xbbb, %rax        # Set result to 0xbbb
+
+handle_result:
+    rmmovq  %rax, (%rsp)        # Store result on the stack
+    irmovq  $1, %rcx            # Set counter to 1
+
+loop_end:
+    irmovq  $0x8, %rdi          # Set increment value to 8
+    addq    %rdi, %rsp          # Increment stack pointer
+
+    popq    %rdi                # Pop the computed address into %rdi
+    ret                         # Return, effectively jumping to the computed address

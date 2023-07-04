@@ -1,0 +1,50 @@
+# Y86-64 program to perform bubblesort with no jumps and at most three conditional moves
+
+# Function: bubble_p
+# Arguments:
+#   %rdi: Pointer to the array
+#   %rsi: Number of elements in the array
+bubble_p:
+    irmovq  $0, %r8              # Initialize outer loop counter
+
+outer_loop:
+    irmovq  $0, %r9              # Initialize inner loop counter
+    irmovq  -8(%rsi), %r10       # Initialize last
+
+inner_loop:
+    addq    $1, %r9              # Increment inner loop counter
+    cmpq    %r10, %r9            # Compare inner loop counter with last
+    jg      done_inner_loop      # Exit inner loop if inner loop counter > last
+
+    mrmovq  (%rdi,%r9,8), %r11   # Load data[i+1] into %r11
+    mrmovq  (%rdi,%r9), %r12     # Load data[i] into %r12
+    cmpq    %r11, %r12           # Compare data[i+1] with data[i]
+    cmovl   %r11, %r13           # Move data[i+1] to %r13 if less
+    cmovl   %r12, %r11           # Move data[i] to %r11 if less
+    cmovl   %r13, %r12           # Move data[i+1] to %r12 if less
+
+    rmmovq  %r11, (%rdi,%r9)     # Store data[i] into data[i+1]
+    rmmovq  %r12, (%rdi,%r9,8)   # Store data[i+1] into data[i]
+
+    jmp     inner_loop           # Jump to next iteration of inner loop
+
+done_inner_loop:
+    addq    $1, %r8              # Increment outer loop counter
+    irmovq  $8, %r14             # Initialize constant 8
+    subq    %r14, %rsi           # Decrement last by 1
+
+    cmpq    $0, %r8              # Compare outer loop counter with 0
+    jg      outer_loop           # Jump to next iteration of outer loop
+
+    ret
+
+# Test code
+.pos    0
+irmovq  $arr, %rdi               # Pass the array address as argument
+irmovq  $5, %rsi                 # Pass the number of elements as argument
+call    bubble_p                 # Call bubble_p function
+
+# Data
+.pos    0x100
+arr:
+    .quad   5, 4, 3, 2, 1
