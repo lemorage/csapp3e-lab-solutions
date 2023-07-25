@@ -1,5 +1,13 @@
 #### 5.13
-A. As the graph [diagram](csapp3e-lab-solutions/hw05/diagram.png) shows, the critical path of operations is determined by the data dependencies between instructions. In this case, the critical path includes the `vmulsd` and `vaddsd` instructions. The `vaddsd` instruction depends on the result of the `vmulsd` instruction, and thus the `vmulsd` instruction creates a data dependency on the memory load (`vmovsd`) instruction. Therefore, the critical path includes the instructions `vmovsd`, `vmulsd`, and `vaddsd`, as shown in the diagram [data flow](csapp3e-lab-solutions/hw05/data-flow.png).
+A. As Figure 1 shows, the critical path of operations is determined by the data dependencies between instructions. In this case, the critical path includes the `vmulsd` and `vaddsd` instructions. The `vaddsd` instruction depends on the result of the `vmulsd` instruction, and thus the `vmulsd` instruction creates a data dependency on the memory load (`vmovsd`) instruction. Therefore, the critical path includes the instructions `vmovsd`, `vmulsd`, and `vaddsd`, as shown in Figure 2.
+<source media="(prefers-color-scheme: light)" srcset="diagram.png">
+<img alt="Figure 1. Data flow diagram" src="diagram.png">
+<b>Figure 1. Data flow diagram</b>
+<br/><br/>
+<source media="(prefers-color-scheme: light)" srcset=".png">
+<img alt="Figure 2. Abstract data dependency" src="data_flow.png">
+<b>Figure 2. Abstract data dependency</b>
+<br/><br/>
 
 B. For data type double, the lower bound on the CPE (cycles per element) is determined by the critical path, which includes the `vmovsd`, `vmulsd`, and `vaddsd` instructions. Since the multiplication (`vmulsd`) instruction requires 5 clock cycles, the lower bound on the CPE for double data is 5.
 
@@ -135,10 +143,169 @@ void inner_unrolled_reassoc(vec_ptr u, vec_ptr v, data_t *dest) {
 ```
 
 #### 5.17
+```c
+void *efficient_memset(void *s, int c, size_t n) {
+    size_t cnt = 0;
+    unsigned char *schar = s;
+    unsigned long word = 0;
+
+    // Perform byte-level writes until s is aligned to a multiple of K
+    while (cnt < n && ((size_t)schar % sizeof(unsigned long)) != 0) {
+        *schar++ = (unsigned char)c;
+        cnt++;
+    }
+
+    // Create a word with eight copies of c
+    for (int i = 0; i < sizeof(unsigned long); i++) {
+        word <<= 8;
+        word |= (unsigned char)c;
+    }
+
+    // Perform word-level writes (eight bytes at a time)
+    unsigned long *sword = (unsigned long *)schar;
+    while (cnt + sizeof(unsigned long) <= n) {
+        *sword++ = word;
+        cnt += sizeof(unsigned long);
+    }
+
+    // Perform any remaining byte-level writes
+    schar = (unsigned char *)sword;
+    while (cnt < n) {
+        *schar++ = (unsigned char)c;
+        cnt++;
+    }
+
+    return s;
+}
+```
+This code ensures portability by using the `sizeof` operator, and it works efficiently for arbitrary values of n, even when n is not a multiple of K.
 
 #### 5.18
+- Horner's method:
+
+```c
+double polyh(double a[], double x, long degree) {
+    long i;
+    double result = a[degree];
+    for (i = degree - 1; i >= 0; i--) {
+        result = a[i] + x * result;
+    }
+    return result;
+}
+```
+
+- Different Variants
+    1. **Loop Unrolling**
+    2. **Parallel Accumulation**
+    3. **Reassociation**
+```c
+// 1. We manually expand the loop body, reducing loop control overhead
+double polyh_unrolled(double a[], double x, long degree) {
+    long i;
+    double result = a[degree];
+
+    // Unroll the loop with a factor of 2
+    for (i = degree - 1; i >= 1; i -= 2) {
+        result = a[i - 1] + x * (a[i] + x * result);
+    }
+
+    // Handle the remaining odd-degree term if any
+    if (i == 0) {
+        result = a[0] + x * result;
+    }
+
+    return result;
+}
+```
+
+    
+
+```c
+// 2. We use multiple accumulators to compute intermediate results in parallel
+double polyh_parallel(double a[], double x, long degree) {
+    long i;
+    double result1 = 0.0;
+    double result2 = 0.0;
+
+    // Parallel accumulation with a factor of 2
+    for (i = degree; i >= 2; i -= 2) {
+        result1 = a[i - 1] + x * result1;
+        result2 = a[i] + x * result2;
+    }
+
+    // Handle the remaining odd-degree term if any
+    if (i == 1) {
+        result1 = a[0] + x * result1;
+    }
+
+    // Combine the results
+    return a[degree] + x * result2 + x * result1;
+}
+```
+
+```c
+// 3. We reorder the operations to minimize the number of operations
+double polyh_reassoc(double a[], double x, long degree) {
+    long i;
+    double result = 0.0;
+
+    // Reassociate the operations for better pipelining
+    for (i = 0; i <= degree; i++) {
+        result = result * x + a[i];
+    }
+
+    return result;
+}
+```
+<br/>
+
+We can mix them together in order to achieve a higher CPE.
+```c
+double polyh_mixed(double a[], double x, long degree) {
+    long i;
+    double result = 0.0;
+
+    // Unroll the loop with a factor of 2 and use parallel accumulation
+    for (i = degree; i >= 2; i -= 2) {
+        result = result * x + a[i];
+        result = result * x + a[i - 1];
+    }
+
+    // Handle the remaining odd-degree term if any
+    if (i == 1) {
+        result = result * x + a[0];
+    }
+
+    return result;
+}
+``` 
 
 #### 5.19
 
-#### 5.20
+```c
+void psum_optimized(float a[], float p[], long n) {
+    long i;
+    float last_val, val1, val2, val3, val4;
 
+    // Process the first four elements to prime the pump
+    val1 = p[0] = a[0];
+    val2 = p[1] = val1 + a[1];
+    val3 = p[2] = val2 + a[2];
+    val4 = p[3] = val3 + a[3];
+
+    // Main loop with four-way unrolling and reassociation
+    for (i = 4; i < n; i += 4) {
+        val1 = val4 + a[i];
+        val2 = val1 + a[i + 1];
+        val3 = val2 + a[i + 2];
+        val4 = val3 + a[i + 3];
+
+        p[i] = val1;
+        p[i + 1] = val2;
+        p[i + 2] = val3;
+        p[i + 3] = val4;
+    }
+}
+```
+
+We process four elements at a time in order to reduce the number of loop iterations and better utilizing the CPU's parallelism. But finally, the CPE we achieved was limited by the available functional units inside the CPU.
