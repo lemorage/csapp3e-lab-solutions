@@ -28,32 +28,32 @@ int main(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-	struct stat stat;
-	char *type, *readok;
-	int fd;
+    struct stat stat;
+    char *type, *readok;
+    int fd;
 
-	if (argc != 2) {
-		fprintf(stderr, "Usage: %s <descriptor>\n", argv[0]);
-		exit(1);
-	}
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <descriptor>\n", argv[0]);
+        exit(1);
+    }
 
-	// Convert argument to integer
-	fd = atoi(argv[1]);
+    // Convert argument to integer
+    fd = atoi(argv[1]);
 
-	Fstat(fd, &stat);
-	if (S_ISREG(stat.st_mode)) /* Determine file type */
-		type ="regular";
-	else if (S_ISDIR(stat.st_mode))
-		type = "directory";
-	else
-		type = "other";
-	if ((stat.st_mode & S_IRUSR)) /* Check read access */
-		readok = "yes";
-	else
-		readok = "no";
+    Fstat(fd, &stat);
+    if (S_ISREG(stat.st_mode)) /* Determine file type */
+        type ="regular";
+    else if (S_ISDIR(stat.st_mode))
+        type = "directory";
+    else
+        type = "other";
+    if ((stat.st_mode & S_IRUSR)) /* Check read access */
+        readok = "yes";
+    else
+        readok = "no";
 
-	printf("type: %s, read: %s\n", type, readok);
-	exit(0);
+    printf("type: %s, read: %s\n", type, readok);
+    exit(0);
 }
 ```
 
@@ -103,18 +103,18 @@ int main(int argc, char **argv)
     ssize_t n;
     rio_t rio;
     char buf[MAXLINE];
-	int fd;
+    int fd;
 
-	if (argc > 1)
-		fd = Open(argv[1], O_RONLY, 0);
-	else
-		fd = STDIN_FILENO;
+    if (argc > 1)
+        fd = Open(argv[1], O_RONLY, 0);
+    else
+        fd = STDIN_FILENO;
 
     Rio_readinitb(&rio, fd);
     while ((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0)
         Rio_writen(STDOUT_FILENO, buf, n);
 
-	/* Close fd if it's not standard input */
+    /* Close fd if it's not standard input */
     if (fd != STDIN_FILENO) {
         Close(fd);
     }
