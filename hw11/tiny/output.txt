@@ -1,0 +1,30 @@
+Accepted connection from (localhost, 56210)
+[1mRequest lines:
+[0mGET / HTTP/1.1
+[1mRequest headers:
+[0mAccept: text/html, application/xhtml+xml, application/xml; q=0.9, image/avif, image/webp, image/apng, */*; q=0.8, application/signed-exchange; v=b3; q=0.7
+Host: localhost:8080
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36
+Accept-Encoding: gzip, deflate, br
+Accept-Language: en-GB, en-US; q=0.9, en; q=0.8
+Referer: https://stunning-acorn-pqwr9r6q749crjpg.github.dev/
+traceparent: 00-78b62fb4d571ac82f7965e23f7baa8fc-ed0186c06c660be9-00
+X-Request-ID: b737fb366bd6b4e989c5623c64dff07f
+X-Real-IP: 10.240.0.222
+X-Forwarded-Proto: https
+X-Forwarded-Host: stunning-acorn-pqwr9r6q749crjpg-8080.app.github.dev
+X-Forwarded-Port: 443
+X-Forwarded-Scheme: https
+X-Original-URI: /
+X-Scheme: https
+Proxy-Connection: Keep-Alive
+sec-ch-ua: "Chromium";v="118", "Google Chrome";v="118", "Not=A?Brand";v="99"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "macOS"
+sec-fetch-site: same-site
+sec-fetch-mode: navigate
+sec-fetch-user: ?1
+sec-fetch-dest: document
+x-original-proto: http
+X-Forwarded-For: 10.240.3.217
+

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Adder Form</title>
+</head>
+<body>
+    <form action="cgi-bin/adder" method="GET">
+        Number 1: <input type="text" name="num1"><br><br>
+        Number 2: <input type="text" name="num2"><br><br>
+        <input type="submit" value="Add Numbers">
+    </form>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const num1 = e.target.num1.value;
+            const num2 = e.target.num2.value;
+            window.location.href = `cgi-bin/adder?${num1}&${num2}`;
+        });
+    </script>
+</body>
+</html>
